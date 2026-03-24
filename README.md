@@ -1,6 +1,3 @@
-<div align="center">
-  <img src="https://img.icons8.com/external-flaticons-lineal-color-flat-icons/256/external-investment-accounting-flaticons-lineal-color-flat-icons.png" alt="Logo" width="120" />
-
   # 💸 Fondo de Emergencia vs. Inflación
   
   **Descubre la cruda realidad de tener tu dinero parado vs. ponerlo a trabajar.**
