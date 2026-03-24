@@ -18,10 +18,8 @@
 
 ## 📸 Un Vistazo a la App
 
-<img width="1256" height="662" alt="VistaApp1" src="https://github.com/user-attachments/assets/7981efef-0d44-4d84-980d-2f17aa12280c" />
-<img width="1263" height="691" alt="VistaApp2" src="https://github.com/user-attachments/assets/194bde42-a583-4c67-b030-2abd8d1ceca9" />
-
-
+<img width="1261" height="686" alt="Vista App 1" src="https://github.com/user-attachments/assets/50eeeaf6-0ab4-4a01-9703-00f64e200c4c" />
+<img width="1255" height="581" alt="Vista App 2" src="https://github.com/user-attachments/assets/7e5c2426-f11f-4bb4-8fc6-cde7c731fae1" />
 
 ## 🎯 ¿Por qué nació este proyecto?
 Mucha gente ahorra dejando su dinero en una cuenta base o literal "bajo el colchón", pensando que están a salvo de riesgos. Sin embargo, ignoran un riesgo invisible pero constante: la **inflación**.
