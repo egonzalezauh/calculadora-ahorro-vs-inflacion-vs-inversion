@@ -18,9 +18,10 @@
 
 ## 📸 Un Vistazo a la App
 
-*(Aquí puedes arrastrar y soltar una captura de pantalla de la app corriendo para que la gente vea cómo luce en tu repositorio).*
+<img width="1256" height="662" alt="VistaApp1" src="https://github.com/user-attachments/assets/7981efef-0d44-4d84-980d-2f17aa12280c" />
+<img width="1263" height="691" alt="VistaApp2" src="https://github.com/user-attachments/assets/194bde42-a583-4c67-b030-2abd8d1ceca9" />
 
----
+
 
 ## 🎯 ¿Por qué nació este proyecto?
 Mucha gente ahorra dejando su dinero en una cuenta base o literal "bajo el colchón", pensando que están a salvo de riesgos. Sin embargo, ignoran un riesgo invisible pero constante: la **inflación**.
