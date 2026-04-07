@@ -15,7 +15,7 @@
   </p>
 </div>
 
----
+
 
 ## 📸 Un Vistazo a la App
 
@@ -24,7 +24,7 @@
   <br><br>
   <img src="Vista%20App%202.png" alt="Vista App 2" width="85%">
 </div>
----
+
 
 ## 🎯 ¿Por qué nació este proyecto?
 Mucha gente ahorra dejando su dinero en una cuenta base o literal "bajo el colchón", pensando que están a salvo de riesgos. Sin embargo, ignoran un riesgo invisible pero constante: la **inflación**.
