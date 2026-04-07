@@ -101,7 +101,7 @@ function formatCardValue(amount, currency) {
 }
 
 // ── Animated number counter ───────────────────────────────────────────
-function animateCount(elementId, targetValue, currency, duration = 700) {
+function animateCount(elementId, targetValue, currency, duration = 1800) {
   const el = document.getElementById(elementId);
   const start = 0;
   const startTime = performance.now();
@@ -109,8 +109,8 @@ function animateCount(elementId, targetValue, currency, duration = 700) {
   function update(currentTime) {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    // Ease-out cubic
-    const eased = 1 - Math.pow(1 - progress, 3);
+    // Ease-out quart (más suave al final)
+    const eased = 1 - Math.pow(1 - progress, 4);
     const current = start + (targetValue - start) * eased;
     // Use abbreviated formatter for cards — prevents overflow
     el.textContent = formatCardValue(current, currency);
@@ -124,6 +124,7 @@ function calculate() {
   const capital = parseFloat(document.getElementById('capital').value);
   const selectedId = document.getElementById('country').value;
   const years = parseInt(document.getElementById('years').value, 10);
+  const customRateStr = document.getElementById('custom-rate').value;
 
   if (!capital || capital <= 0) {
     alert('Por favor ingresa un capital válido mayor a 0.');
@@ -136,6 +137,10 @@ function calculate() {
 
   const country = countriesData.find(c => c.id === selectedId);
 
+  // Si el usuario da una tasa personalizada, convertirla (e.g. 8.5 -> 0.085)
+  const customRate = parseFloat(customRateStr);
+  const effectiveSafeRate = (!isNaN(customRate) && customRate >= 0) ? (customRate / 100) : country.safe_rate;
+
   // Build year-by-year series (0 to years inclusive)
   const labels = [];
   const seriesBase = [];      // Blue — flat capital
@@ -146,7 +151,7 @@ function calculate() {
     labels.push(t === 0 ? 'Hoy' : `Año ${t}`);
     seriesBase.push(capital);
     seriesInflation.push(capital / Math.pow(1 + country.inflation_rate, t));
-    seriesInvested.push(capital * Math.pow(1 + country.safe_rate, t));
+    seriesInvested.push(capital * Math.pow(1 + effectiveSafeRate, t));
   }
 
   const finalInflation = seriesInflation[years];
@@ -176,17 +181,20 @@ function calculate() {
   // ── Render / Update Chart ────────────────────────────────────────
   const ctx = document.getElementById('projection-chart').getContext('2d');
 
+  // Dinamic point radius para evitar puntos gordos al seleccionar muchos años
+  const pRadius = years > 30 ? 1 : (years > 15 ? 2.5 : 4);
+
   const chartData = {
     labels,
     datasets: [
       {
         label: 'Capital Inicial',
         data: seriesBase,
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.08)',
-        pointBackgroundColor: '#3b82f6',
+        borderColor: '#4A6984',
+        backgroundColor: 'rgba(74, 105, 132, 0.08)',
+        pointBackgroundColor: '#4A6984',
         borderWidth: 2.5,
-        pointRadius: 4,
+        pointRadius: pRadius,
         pointHoverRadius: 7,
         fill: false,
         tension: 0.1,
@@ -195,11 +203,11 @@ function calculate() {
       {
         label: 'Bajo el Colchón (inflación)',
         data: seriesInflation,
-        borderColor: '#f43f5e',
-        backgroundColor: 'rgba(244, 63, 94, 0.08)',
-        pointBackgroundColor: '#f43f5e',
+        borderColor: '#914541',
+        backgroundColor: 'rgba(145, 69, 65, 0.08)',
+        pointBackgroundColor: '#914541',
         borderWidth: 2.5,
-        pointRadius: 4,
+        pointRadius: pRadius,
         pointHoverRadius: 7,
         fill: true,
         tension: 0.35,
@@ -207,11 +215,11 @@ function calculate() {
       {
         label: 'Invirtiendo Seguro',
         data: seriesInvested,
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.10)',
-        pointBackgroundColor: '#10b981',
+        borderColor: '#41704B',
+        backgroundColor: 'rgba(65, 112, 75, 0.10)',
+        pointBackgroundColor: '#41704B',
         borderWidth: 2.5,
-        pointRadius: 4,
+        pointRadius: pRadius,
         pointHoverRadius: 7,
         fill: true,
         tension: 0.35,
@@ -226,11 +234,11 @@ function calculate() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(10, 8, 40, 0.9)',
-        borderColor: 'rgba(139, 92, 246, 0.4)',
+        backgroundColor: 'rgba(244, 239, 230, 0.95)',
+        borderColor: 'rgba(204, 192, 176, 0.8)',
         borderWidth: 1,
-        titleColor: '#c4b5fd',
-        bodyColor: '#e2e8f0',
+        titleColor: '#2B231D',
+        bodyColor: '#5C544C',
         padding: 12,
         callbacks: {
           label: function (context) {
@@ -242,13 +250,13 @@ function calculate() {
     },
     scales: {
       x: {
-        ticks: { color: '#94a3b8', font: { size: 11 } },
-        grid: { color: 'rgba(148, 163, 184, 0.08)' },
+        ticks: { color: '#5C544C', font: { size: 11, weight: 'bold' } },
+        grid: { color: 'rgba(92, 84, 76, 0.15)' },
       },
       y: {
         ticks: {
-          color: '#94a3b8',
-          font: { size: 11 },
+          color: '#5C544C',
+          font: { size: 11, weight: 'bold' },
           callback: function (value) {
             const sym = country.currency_symbol;
             const abs = Math.abs(value);
@@ -258,7 +266,7 @@ function calculate() {
             return `${sym}${value}`;
           }
         },
-        grid: { color: 'rgba(148, 163, 184, 0.08)' },
+        grid: { color: 'rgba(92, 84, 76, 0.15)' },
       }
     }
   };

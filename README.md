@@ -1,3 +1,4 @@
+
   # 💸 Fondo de Emergencia vs. Inflación
   
   **Descubre la cruda realidad de tener tu dinero parado vs. ponerlo a trabajar.**
@@ -18,8 +19,10 @@
 
 ## 📸 Un Vistazo a la App
 
-*(Aquí puedes arrastrar y soltar una captura de pantalla de la app corriendo para que la gente vea cómo luce en tu repositorio).*
-
+<div align="center">
+  <img src="Vista%20App%201.png" alt="Vista App 1" width="45%" style="margin-right: 2%">
+  <img src="Vista%20App%202.png" alt="Vista App 2" width="45%">
+</div>
 ---
 
 ## 🎯 ¿Por qué nació este proyecto?
@@ -30,9 +33,10 @@ Esta Single Page Application (SPA), patrocinada sutilmente por la marca "Mente R
 ## ✨ Características Principales
 
 *   **⚡ Arquitectura Rápida**: Un backend súper liviano impulsado por **FastAPI** (Python) que sirve directamente la lógica de la UI y provee a través de una API el JSON con las tasas de países.
-*   **📈 Gráficos Interactivos**: Integración con **Chart.js** para renderizar, en tiempo real, 3 curvas de crecimiento a lo largo de 50 años (Erosión por inflación, Inversión estática y Crecimiento con interés compuesto).
-*   **💎 UI / UX Pulcra**: Diseño *Glassmorphism* y animaciones integradas mediante Tailwind CSS, asegurando que la calculadora luzca como un producto financiero de nivel *Premium*.
-*   **📱 Mobile-First**: Layout adaptivo construido desde cero para soportar todo tipo de pantallas sin desbordarse, incluso al calcular el interés compuesto de **cantidades exhorbitantes** gracias al reformateo dinámico de números grandes.
+*   **📈 Gráficos Interactivos**: Integración con **Chart.js** para renderizar proyecciones precisas, reajustando dinámicamente el tamaño de los puntos de las 3 curvas a lo largo de 50 años.
+*   **🎯 Control Total del Usuario**: Capacidad de seleccionar países para usar tasas bancarias predeterminadas, o ignorarlas e introducir **tasas de rendimiento anualizadas completamente personalizadas**.
+*   **💎 UI / UX Pulcra**: Transición de estilo a un ambiente *Vintage Estético* e interactivo. Animaciones suavizadas para simular productos financieros *premium* sin temblores en la pantalla (*zero layout shifting*).
+*   **📱 Mobile-First**: Layout adaptivo construido desde cero para soportar todo tipo de pantallas, incluso calculando el interés compuesto de **cantidades exorbitantes** gracias al reformateo inteligente de números.
 
 ## 🛠️ Cómo Inicializar el Proyecto Localmente
 
