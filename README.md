@@ -20,8 +20,9 @@
 ## 📸 Un Vistazo a la App
 
 <div align="center">
-  <img src="Vista%20App%201.png" alt="Vista App 1" width="45%" style="margin-right: 2%">
-  <img src="Vista%20App%202.png" alt="Vista App 2" width="45%">
+  <img src="Vista%20App%201.png" alt="Vista App 1" width="85%">
+  <br><br>
+  <img src="Vista%20App%202.png" alt="Vista App 2" width="85%">
 </div>
 ---
 
