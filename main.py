@@ -1,9 +1,14 @@
-from fastapi import FastAPI
+from pydantic import BaseModel
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from fastapi import FastAPI
 
 app = FastAPI(title="Calculadora Fondo de Emergencia vs. Inflación")
+# Define el modelo de datos para la captura de leads
+class Lead(BaseModel):
+    name: str
+    email: str
 
 # Serve static files (script.js, etc.)
 BASE_DIR = Path(__file__).parent
@@ -42,6 +47,16 @@ def get_country_data():
         ]
     }
 
+
+@app.post("/api/lead-capture")
+def capture_lead(data: Lead):
+    """
+    Captures user contact information (Name and Email) as a lead for future marketing campaigns.
+    In a production environment, this would save data to a CRM or database.
+    """
+    # --- SIMULACIÓN DE BASE DE DATOS/CRM ---
+    print(f"⚡️ NUEVO LEAD CAPTURADO: Nombre={data.name}, Email={data.email}")
+    return {"status": "success", "message": "Gracias por tu interés. Tu información ha sido registrada con éxito."}
 
 @app.get("/")
 def serve_index():

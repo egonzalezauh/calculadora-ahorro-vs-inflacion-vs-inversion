@@ -163,9 +163,9 @@
         </div>
 
         <!-- Tasa Personalizada -->
-        <div>
-          <label for="custom-rate" class="block text-sm font-bold text-vintage-textSecondary mb-1.5">
-            🎯 Tasa de Rendimiento Anual (Opcional)
+        <div id="custom-rate-container" class="relative opacity-70 transition-opacity duration-300">
+          <label id="custom-rate-label" for="custom-rate" class="block text-sm font-bold text-vintage-textSecondary mb-1.5 flex items-center gap-2">
+            🔒 Tasa de Rendimiento Anual (Premium)
           </label>
           <div class="relative">
             <input
@@ -173,12 +173,13 @@
               type="number"
               min="0"
               step="0.1"
-              placeholder="Ej: 8.5"
-              class="input-styled w-full rounded-xl px-4 py-3 pr-8 text-base font-bold shadow-inner"
+              placeholder="Desbloquea abajo 👇"
+              disabled
+              class="input-styled w-full rounded-xl px-4 py-3 pr-8 text-base font-bold shadow-inner cursor-not-allowed bg-black/5"
             />
             <span class="absolute inset-y-0 right-4 flex items-center text-vintage-textSecondary font-extrabold pointer-events-none">%</span>
           </div>
-          <p class="text-xs text-vintage-textSecondary mt-1.5 opacity-80 font-medium">Déjalo en blanco para usar la tasa de Banco/CETES del país.</p>
+          <p id="custom-rate-desc" class="text-xs text-vintage-textSecondary mt-1.5 opacity-80 font-medium">Usa tu propia tasa de inversión desbloqueando esta función.</p>
         </div>
 
         <!-- Tiempo -->
@@ -214,13 +215,16 @@
           <p class="text-xs text-vintage-textSecondary mt-2 opacity-80 font-bold border-t border-vintage-border pt-1">Fuente: <span id="info-source"></span></p>
         </div>
 
-        <!-- CTA Button -->
-        <button
-          id="btn-calculate"
-          class="w-full bg-vintage-btn hover:bg-vintage-btnHover active:scale-95 text-[#F4EFE6] font-black tracking-wide text-lg py-3.5 rounded-xl transition-all duration-200 shadow-[0_4px_12px_rgba(43,35,29,0.2)] flex items-center justify-center gap-2 mt-2"
-        >
-          <span>📊</span> Calcular Impacto
-        </button>
+        <!-- Calcular Button -->
+        <div class="mt-2 flex flex-col gap-4 border-t border-vintage-border pt-4">
+          <button
+            id="btn-calculate"
+            type="button"
+            class="w-full bg-vintage-btn hover:bg-vintage-btnHover active:scale-95 text-[#F4EFE6] font-black tracking-wide text-lg py-3.5 rounded-xl transition-all duration-200 shadow-[0_4px_12px_rgba(43,35,29,0.2)] flex items-center justify-center gap-2 mt-1"
+          >
+            <span class="text-xl opacity-80">📊</span> Calcular Impacto
+          </button>
+        </div>
 
       </div>
     </section>
@@ -279,14 +283,52 @@
       </div>
 
       <!-- Disclaimer -->
-      <p class="text-xs font-medium text-vintage-textSecondary text-center pb-6 opacity-75 max-w-xl mx-auto">
+      <p class="text-xs font-medium text-vintage-textSecondary text-center pb-2 opacity-75 max-w-xl mx-auto">
         ⚠️ Las tasas son promedios estimados 2022-2024. No constituyen asesoría financiera. Las rentabilidades pasadas no garantizan rentabilidades futuras.
       </p>
+
+      <!-- Premium Features Unlock / Lead Capture -->
+      <div id="premium-unlock-section" class="card-aesthetic rounded-2xl p-6 sm:p-8 mt-2 border-2 border-vintage-accentBlue/20">
+        <h2 class="text-xl font-extrabold text-vintage-textPrimary mb-3 flex items-center gap-2">
+          <span>✨</span> Desbloquea Funciones Avanzadas
+        </h2>
+        <p class="text-sm font-medium text-vintage-textSecondary mb-5">
+          ¿Quieres simular con <strong>tasas de rendimiento personalizadas</strong> y recibir estrategias exclusivas para ganarle a la inflación? Ingresa tus datos para desbloquear estas funciones.
+        </p>
+        
+        <form id="lead-form" class="flex flex-col gap-4">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input
+              id="name"
+              type="text"
+              required
+              placeholder="Tu Nombre"
+              class="input-styled flex-1 rounded-xl px-4 py-3 text-base font-bold shadow-inner"
+            />
+            <input
+              id="email"
+              type="email"
+              required
+              placeholder="Tu Correo Electrónico"
+              class="input-styled flex-1 rounded-xl px-4 py-3 text-base font-bold shadow-inner"
+            />
+          </div>
+          
+          <button
+            id="btn-save-lead"
+            type="submit"
+            class="w-full sm:w-auto self-end bg-vintage-accentBlue hover:opacity-90 active:scale-95 text-[#F4EFE6] font-black tracking-wide text-base py-3 px-8 rounded-xl transition-all duration-200 shadow-md flex items-center justify-center gap-2"
+          >
+            🔓 Desbloquear Ahora
+          </button>
+          <div id="lead-message" class="text-sm text-center h-5 font-medium transition-colors w-full mt-1"></div>
+        </form>
+      </div>
 
     </section>
 
   </main>
 
-  <script src="/static/script.js?v=3"></script>
+  <script src="/static/script.js?v=4"></script>
 </body>
 </html>
