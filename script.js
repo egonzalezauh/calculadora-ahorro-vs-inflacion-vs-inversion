@@ -43,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   loadCountries();
+
+  // Check if user already unlocked premium features
+  if (localStorage.getItem('leadCaptured') === 'true') {
+    unlockPremiumFeatures(true);
+  }
 });
 
 // ── Fetch country data from FastAPI on page load ──────────────────────
@@ -375,7 +380,9 @@ async function handleLeadFormSubmit(e) {
     }
 }
 
-function unlockPremiumFeatures() {
+function unlockPremiumFeatures(isInitialLoad = false) {
+    localStorage.setItem('leadCaptured', 'true');
+
     const customRateInput = document.getElementById('custom-rate');
     if (customRateInput) {
         customRateInput.disabled = false;
@@ -409,7 +416,7 @@ function unlockPremiumFeatures() {
         `;
     }
 
-    if (customRateInput) {
+    if (customRateInput && !isInitialLoad) {
         customRateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => customRateInput.focus(), 500);
     }
