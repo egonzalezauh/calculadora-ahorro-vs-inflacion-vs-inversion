@@ -1,4 +1,5 @@
 import os
+import time
 import urllib.request
 import json
 from pydantic import BaseModel, Field, EmailStr, field_validator
@@ -46,16 +47,23 @@ class Lead(BaseModel):
         except EmailNotValidError as e:
             raise ValueError(str(e))
 
-# Serve static files (script.js, etc.)
+# Serve static files ONLY from the dedicated public folder (never the project root:
+# mounting BASE_DIR would expose .env, .git/ and server logs to anyone).
 BASE_DIR = Path(__file__).parent
-app.mount("/static", StaticFiles(directory=BASE_DIR), name="static")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+
+# Simple in-memory rate limit for lead capture (5 requests per IP per hour)
+RATE_LIMIT = 5
+RATE_WINDOW_SECONDS = 3600
+_lead_hits: dict = {}
 
 
 @app.get("/api/data")
 def get_country_data():
     """
     Returns economic data (inflation & safe interest rate) per country.
-    Sources: BCE (Ecuador) and Banxico / INEGI (Mexico).
+    Sources: BCE (Ecuador), Banxico / INEGI (Mexico), DANE (Colombia),
+    INEI (Peru) and Eurostat / BCE (Euro Zone).
     Averages based on 2022-2024 data.
     """
     return {
@@ -80,6 +88,36 @@ def get_country_data():
                 "safe_instrument": "CETES a 1 año",
                 "inflation_source": "INEGI – promedio 2022-2024",
             },
+            {
+                "id": "CO",
+                "name": "Colombia 🇨🇴",
+                "currency": "COP",
+                "currency_symbol": "$",
+                "inflation_rate": 0.092,   # 9.2% - Avg. 2022-2024 (DANE: 13.12 / 9.28 / 5.20)
+                "safe_rate": 0.095,        # 9.5% - CDT bancario
+                "safe_instrument": "CDT (Certificado de Depósito a Término)",
+                "inflation_source": "DANE – promedio 2022-2024",
+            },
+            {
+                "id": "PE",
+                "name": "Perú 🇵🇪",
+                "currency": "PEN",
+                "currency_symbol": "S/",
+                "inflation_rate": 0.046,   # 4.6% - Avg. 2022-2024 (INEI: 8.46 / 3.24 / 1.97)
+                "safe_rate": 0.060,        # 6.0% - Depósito a Plazo en soles
+                "safe_instrument": "Depósito a Plazo Fijo (soles)",
+                "inflation_source": "INEI – promedio 2022-2024",
+            },
+            {
+                "id": "EU",
+                "name": "Zona Euro 🇪🇺",
+                "currency": "EUR",
+                "currency_symbol": "€",
+                "inflation_rate": 0.054,   # 5.4% - Avg. 2022-2024 (Eurostat HICP: 8.4 / 5.4 / 2.4)
+                "safe_rate": 0.025,        # 2.5% - Depósitos a plazo de hogares (BCE)
+                "safe_instrument": "Depósito a Plazo Fijo (bancos)",
+                "inflation_source": "Eurostat (HICP) – promedio 2022-2024",
+            },
         ]
     }
 
@@ -89,12 +127,18 @@ def capture_lead(data: Lead, request: Request):
     """
     Captures user contact information (Name and Email) as a lead for future marketing campaigns.
     """
-    # 1. Obtener la IP real del cliente
-    client_ip = request.client.host
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        client_ip = forwarded.split(",")[0].strip()
-        
+    # 1. Rate limit por IP (evita spam de leads)
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    hits = [t for t in _lead_hits.get(client_ip, []) if now - t < RATE_WINDOW_SECONDS]
+    if len(hits) >= RATE_LIMIT:
+        raise HTTPException(status_code=429, detail="Demasiadas solicitudes. Intenta más tarde.")
+    hits.append(now)
+    _lead_hits[client_ip] = hits
+
+    # Nota: no se confía en X-Forwarded-For porque el cliente puede falsificarlo;
+    # solo es fiable detrás de un proxy de confianza, que aquí no existe.
+
     # 2. Detectar país usando ip-api.com
     country = "Desconocido"
     if client_ip and client_ip not in ("127.0.0.1", "localhost", "::1"):
@@ -113,13 +157,12 @@ def capture_lead(data: Lead, request: Request):
     if supabase:
         try:
             supabase.table("leads").insert({"nombre": data.name, "email": data.email, "pais": country}).execute()
-            print(f"[SUCCESS] NUEVO LEAD CAPTURADO Y GUARDADO EN SUPABASE: Nombre={data.name}, Email={data.email}, País={country}")
+            print("[SUCCESS] NUEVO LEAD CAPTURADO Y GUARDADO EN SUPABASE (datos personales no se registran en logs)")
         except Exception as e:
             print(f"[ERROR] Error al guardar en Supabase: {e}")
             raise HTTPException(status_code=500, detail="Error al procesar el registro.")
     else:
-        # --- SIMULACIÓN DE BASE DE DATOS/CRM ---
-        print(f"[INFO] NUEVO LEAD CAPTURADO (Sin conexión a BD): Nombre={data.name}, Email={data.email}, País={country}")
+        print("[INFO] NUEVO LEAD CAPTURADO (Sin conexión a BD; datos personales no se registran en logs)")
         
     return {"status": "success", "message": "Gracias por tu interés. Tu información ha sido registrada con éxito."}
 

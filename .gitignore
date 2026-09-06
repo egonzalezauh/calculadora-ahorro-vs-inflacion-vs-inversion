@@ -25,7 +25,11 @@ __pycache__/
 ehthumbs.db
 Thumbs.db
 
+# Documentation
+CLAUDE.md
 AGENTS.md
 
-
-
+# Local dev artifacts
+server_out.log
+server_err.log
+.claude/

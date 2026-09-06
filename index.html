@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculadora Fondo de Emergencia vs. Inflación</title>
-  <meta name="description" content="Descubre cuánto pierdes al dejar tu dinero quieto vs. invertirlo en un instrumento seguro. Calculadora interactiva." />
+  <meta name="description" content="Descubre cuánto pierde tu dinero al quedar quieto frente a la inflación, y cuánto crecería en un instrumento seguro. Calculadora interactiva." />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,20 +12,18 @@
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Merriweather', 'serif'] },
+          fontFamily: {
+            display: ['Fraunces', 'serif'],
+            sans: ['"Instrument Sans"', 'sans-serif'],
+            mono: ['"Spline Sans Mono"', 'monospace'],
+          },
           colors: {
-            vintage: {
-              bg: '#EBE3D0',
-              card: '#F4EFE6',
-              textPrimary: '#2B231D',
-              textSecondary: '#5C544C',
-              border: '#CCC0B0',
-              btn: '#5F5852',
-              btnHover: '#4B453F',
-              accentGreen: '#41704B',
-              accentRed: '#914541',
-              accentBlue: '#4A6984'
-            }
+            billete: { DEFAULT: '#081D15', deep: '#0A271E' },
+            panel:   '#020A05',
+            linea:   '#2E5A4B',
+            grabado: { DEFAULT: '#EFE9D8', muted: '#9DB8AC' },
+            oro:     '#CBA349',
+            sello:   '#D26A5C',
           },
           animation: {
             'fade-in': 'fadeIn 0.5s ease-out',
@@ -43,79 +41,98 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,900;1,9..144,600&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
   <style>
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background-color: #EBE3D0;
-      background-image: radial-gradient(circle at center, #F4EEDF 0%, #DFD2B7 100%);
+    body {
+      font-family: 'Instrument Sans', sans-serif;
+      background-color: #081D15;
       min-height: 100vh;
-      color: #2B231D;
+      color: #EFE9D8;
     }
-    h1 {
-      font-family: 'Merriweather', serif;
+    h1, h2, h3 { font-family: 'Fraunces', serif; }
+
+    .panel {
+      background: #020A05;
+      border: 1px solid rgba(203, 163, 73, 0.4);
+      box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(239, 233, 216, 0.05);
     }
-    .card-aesthetic {
-      background: rgba(244, 239, 230, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(204, 192, 176, 0.6);
-      box-shadow: 0 4px 15px -2px rgba(43, 35, 29, 0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card-aesthetic:hover { 
-      box-shadow: 0 8px 25px -4px rgba(43, 35, 29, 0.12); 
-    }
-    input[type=range] { accent-color: #5F5852; }
+
+    input[type=range] { accent-color: #CBA349; }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { opacity: 1; }
-    .result-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .result-card:hover { transform: translateY(-4px); }
 
-    /* Gradient border on inputs */
     .input-styled {
-      background: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(204, 192, 176, 1);
-      color: #2B231D;
-      transition: all 0.25s;
+      background: #0A261D;
+      border: 1px solid rgba(203, 163, 73, 0.35);
+      color: #EFE9D8;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
     }
+    .input-styled::placeholder { color: rgba(239, 233, 216, 0.35); }
     .input-styled:focus {
       outline: none;
-      border-color: #5F5852;
-      box-shadow: 0 0 0 3px rgba(95, 88, 82, 0.15);
-      background: rgba(255, 255, 255, 0.9);
+      border-color: #CBA349;
+      box-shadow: 0 0 0 3px rgba(203, 163, 73, 0.22);
+      background: #0E3226;
     }
+    select.input-styled option { background: #0A271E; color: #EFE9D8; }
+
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid #CBA349;
+      outline-offset: 2px;
+    }
+
+    .eyebrow {
+      font-family: 'Spline Sans Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.68rem;
+      font-weight: 600;
+    }
+
     .card-value {
-      font-size: clamp(1.1rem, 4.5vw, 1.875rem);
+      font-family: 'Spline Sans Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(1.1rem, 4.5vw, 1.75rem);
       line-height: 1.2;
-      min-height: 2.4em; /* Previene temblores asegurando espacio fijo para 2 líneas */
+      min-height: 2.4em; /* Espacio fijo para 2 líneas: evita saltos de layout */
       display: flex;
       align-items: center;
       justify-content: center;
-      font-variant-numeric: tabular-nums; /* Mantiene anchura de los números estable */
       overflow-wrap: anywhere;
       word-break: break-word;
       width: 100%;
     }
+
+    .result-card { transition: transform 0.3s ease; }
+    .result-card:hover { transform: translateY(-3px); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      html { scroll-behavior: auto; }
+    }
   </style>
 </head>
 
-<body class="min-h-screen text-vintage-textPrimary">
+<body class="min-h-screen text-grabado">
 
   <!-- ====== HEADER ====== -->
   <header class="pt-10 pb-4 px-4 text-center flex flex-col items-center">
-    <img src="/static/Logo%20Mente%20Rica.jpg" alt="Mente Rica" class="h-16 w-16 mb-4 object-contain transition-transform hover:scale-105 rounded-full shadow-md border border-vintage-border" />
-    <div class="inline-flex items-center gap-2 bg-vintage-card border border-vintage-border text-vintage-textSecondary text-xs font-bold px-4 py-1.5 rounded-full mb-4 tracking-widest uppercase shadow-sm">
-      📊 Herramienta Financiera
-    </div>
-    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black leading-tight text-vintage-textPrimary drop-shadow-sm uppercase tracking-tighter">
-      Fondo de Emergencia<br class="sm:hidden" /> <span class="text-vintage-textSecondary font-bold text-2xl sm:text-3xl">vs.</span> Inflación
+    <img src="/static/Logo%20Mente%20Rica.jpg" alt="Mente Rica" class="h-16 w-16 mb-5 object-contain rounded-full shadow-md ring-2 ring-oro/40" />
+    <p class="eyebrow text-oro border border-oro/30 rounded-full px-4 py-1.5 mb-5 bg-billete-deep/60">Herramienta financiera</p>
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight text-grabado">
+      Fondo de emergencia<br class="sm:hidden" />
+      <span class="text-oro italic font-semibold text-2xl sm:text-3xl align-middle">vs.</span>
+      inflación
     </h1>
-    <p class="mt-4 text-vintage-textSecondary font-medium text-sm sm:text-base max-w-xl mx-auto">
-      Descubre cuánto dinero <strong class="text-vintage-accentRed font-bold">pierdes</strong> al dejarlo quieto y cuánto <strong class="text-vintage-accentGreen font-bold">ganarías</strong> invirtiéndolo de forma segura.
+    <p class="mt-4 text-grabado-muted font-medium text-sm sm:text-base max-w-xl mx-auto">
+      Mira cuánto poder de compra <strong class="text-sello font-bold">se erosiona</strong> cuando tu dinero no se mueve, y cuánto <strong class="text-oro font-bold">crece</strong> cuando trabaja en un instrumento seguro.
     </p>
   </header>
 
@@ -123,20 +140,20 @@
   <main class="px-4 py-6 max-w-2xl mx-auto flex flex-col gap-6">
 
     <!-- FORM CARD -->
-    <section class="card-aesthetic rounded-2xl p-5 sm:p-7">
-      <h2 class="text-lg font-extrabold text-vintage-textPrimary mb-5 flex items-center gap-2">
-        <span class="text-xl opacity-80">⚙️</span> Tus Datos
+    <section class="panel rounded-xl p-5 sm:p-7">
+      <h2 class="text-lg font-bold text-grabado mb-5 flex items-baseline gap-3">
+        <span class="eyebrow text-oro">01</span> Tus datos
       </h2>
 
       <div class="flex flex-col gap-5">
 
         <!-- Capital Inicial -->
         <div>
-          <label for="capital" class="block text-sm font-bold text-vintage-textSecondary mb-1.5">
-            Capital Inicial <span id="currency-label" class="text-vintage-textPrimary font-extrabold">(USD)</span>
+          <label for="capital" class="block text-sm font-semibold text-grabado-muted mb-1.5">
+            Capital inicial <span id="currency-label" class="text-grabado font-bold">(USD)</span>
           </label>
           <div class="relative">
-            <span class="absolute inset-y-0 left-3 flex items-center text-vintage-textSecondary font-bold pointer-events-none" id="currency-symbol">$</span>
+            <span class="absolute inset-y-0 left-3 flex items-center text-oro font-bold pointer-events-none" id="currency-symbol">$</span>
             <input
               id="capital"
               type="number"
@@ -144,19 +161,39 @@
               step="100"
               value="5000"
               placeholder="Ej: 5000"
-              class="input-styled w-full rounded-xl pl-8 pr-4 py-3 text-lg font-bold shadow-inner"
+              class="input-styled w-full rounded-lg pl-8 pr-4 py-3 text-lg font-bold"
             />
           </div>
         </div>
 
+        <!-- Aporte Mensual -->
+        <div>
+          <label for="monthly-contribution" class="block text-sm font-semibold text-grabado-muted mb-1.5">
+            Aporte mensual <span id="monthly-currency-label" class="text-grabado font-bold">(USD)</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3 flex items-center text-oro font-bold pointer-events-none" id="monthly-currency-symbol">$</span>
+            <input
+              id="monthly-contribution"
+              type="number"
+              min="0"
+              step="50"
+              value="0"
+              placeholder="Ej: 200"
+              class="input-styled w-full rounded-lg pl-8 pr-4 py-3 text-lg font-bold"
+            />
+          </div>
+          <p class="text-xs text-grabado-muted mt-1.5 font-medium">Dinero que agregas cada mes. Deja 0 si no harás aportes.</p>
+        </div>
+
         <!-- País -->
         <div>
-          <label for="country" class="block text-sm font-bold text-vintage-textSecondary mb-1.5">
-            🌎 País
+          <label for="country" class="block text-sm font-semibold text-grabado-muted mb-1.5">
+            País
           </label>
           <select
             id="country"
-            class="input-styled w-full rounded-xl px-4 py-3 text-base font-bold appearance-none cursor-pointer shadow-inner"
+            class="input-styled w-full rounded-lg px-4 py-3 text-base font-bold appearance-none cursor-pointer"
           >
             <option value="">Cargando países...</option>
           </select>
@@ -164,8 +201,8 @@
 
         <!-- Tasa Personalizada -->
         <div id="custom-rate-container" class="relative opacity-70 transition-opacity duration-300">
-          <label id="custom-rate-label" for="custom-rate" class="block text-sm font-bold text-vintage-textSecondary mb-1.5 flex items-center gap-2">
-            🔒 Tasa de Rendimiento Anual (Premium)
+          <label id="custom-rate-label" for="custom-rate" class="block text-sm font-semibold text-grabado-muted mb-1.5">
+            Tasa de rendimiento anual — Premium
           </label>
           <div class="relative">
             <input
@@ -173,22 +210,22 @@
               type="number"
               min="0"
               step="0.1"
-              placeholder="Desbloquea abajo 👇"
+              placeholder="Desbloquea esta función abajo"
               disabled
-              class="input-styled w-full rounded-xl px-4 py-3 pr-8 text-base font-bold shadow-inner cursor-not-allowed bg-black/5"
+              class="input-styled w-full rounded-lg px-4 py-3 pr-8 text-base font-bold cursor-not-allowed"
             />
-            <span class="absolute inset-y-0 right-4 flex items-center text-vintage-textSecondary font-extrabold pointer-events-none">%</span>
+            <span class="absolute inset-y-0 right-4 flex items-center text-oro font-bold pointer-events-none">%</span>
           </div>
-          <p id="custom-rate-desc" class="text-xs text-vintage-textSecondary mt-1.5 opacity-80 font-medium">Usa tu propia tasa de inversión desbloqueando esta función.</p>
+          <p id="custom-rate-desc" class="text-xs text-grabado-muted mt-1.5 font-medium">Usa tu propia tasa de inversión desbloqueando esta función.</p>
         </div>
 
         <!-- Tiempo -->
         <div>
           <div class="flex justify-between items-center mb-2">
-            <label for="years" class="text-sm font-bold text-vintage-textSecondary">
-              📅 Tiempo de Proyección
+            <label for="years" class="text-sm font-semibold text-grabado-muted">
+              Tiempo de proyección
             </label>
-            <span class="text-vintage-card font-black text-xs bg-vintage-textPrimary px-3 py-1 rounded-md" id="years-display">5 años</span>
+            <span class="font-mono font-bold text-xs bg-oro text-billete-deep px-3 py-1 rounded-md tabular-nums" id="years-display">5 años</span>
           </div>
           <input
             id="years"
@@ -196,9 +233,9 @@
             min="1"
             max="50"
             value="5"
-            class="w-full h-2 rounded-full cursor-pointer bg-vintage-border accent-vintage-buttonBtn"
+            class="w-full h-2 rounded-full cursor-pointer bg-linea"
           />
-          <div class="flex justify-between text-xs font-bold text-vintage-textSecondary mt-1 px-1 opacity-70">
+          <div class="flex justify-between text-xs font-semibold text-grabado-muted mt-1 px-1 opacity-80">
             <span>1</span>
             <span>10</span>
             <span>20</span>
@@ -209,20 +246,20 @@
         </div>
 
         <!-- Info rates box -->
-        <div id="rates-info" class="hidden rounded-xl border border-vintage-border bg-[rgba(255,255,255,0.4)] p-4 text-sm font-medium text-vintage-textSecondary flex flex-col gap-1.5 shadow-sm">
-          <p>📈 <strong class="text-vintage-textPrimary">Inflación promedio anual:</strong> <span id="info-inflation" class="font-bold text-vintage-accentRed"></span></p>
-          <p>💰 <strong class="text-vintage-textPrimary">Instrumento seguro:</strong> <span id="info-instrument" class="text-vintage-accentGreen font-bold"></span> — <span id="info-rate" class="font-extrabold text-vintage-accentGreen"></span></p>
-          <p class="text-xs text-vintage-textSecondary mt-2 opacity-80 font-bold border-t border-vintage-border pt-1">Fuente: <span id="info-source"></span></p>
+        <div id="rates-info" class="hidden rounded-lg border border-linea bg-billete-deep p-4 text-sm text-grabado-muted flex flex-col gap-1.5">
+          <p><span class="eyebrow text-grabado-muted/70 block mb-0.5">Inflación promedio anual</span> <strong class="text-sello font-mono font-bold" id="info-inflation"></strong></p>
+          <p><span class="eyebrow text-grabado-muted/70 block mb-0.5">Instrumento seguro</span> <strong id="info-instrument" class="text-grabado font-semibold"></strong> — <strong id="info-rate" class="text-oro font-mono font-bold"></strong></p>
+          <p class="text-xs text-grabado-muted/80 mt-2 border-t border-linea pt-1.5">Fuente: <span id="info-source"></span></p>
         </div>
 
         <!-- Calcular Button -->
-        <div class="mt-2 flex flex-col gap-4 border-t border-vintage-border pt-4">
+        <div class="mt-2 flex flex-col gap-4 border-t border-linea pt-4">
           <button
             id="btn-calculate"
             type="button"
-            class="w-full bg-vintage-btn hover:bg-vintage-btnHover active:scale-95 text-[#F4EFE6] font-black tracking-wide text-lg py-3.5 rounded-xl transition-all duration-200 shadow-[0_4px_12px_rgba(43,35,29,0.2)] flex items-center justify-center gap-2 mt-1"
+            class="w-full bg-oro hover:bg-[#D9B45C] active:scale-[0.98] text-billete-deep font-bold tracking-wide text-lg py-3.5 rounded-lg transition-all duration-200 shadow-[0_4px_16px_rgba(203,163,73,0.3)] flex items-center justify-center gap-2 mt-1"
           >
-            <span class="text-xl opacity-80">📊</span> Calcular Impacto
+            Calcular impacto
           </button>
         </div>
 
@@ -232,94 +269,104 @@
     <!-- RESULTS SECTION (hidden initially) -->
     <section id="results-section" class="hidden animate-slide-up flex flex-col gap-6">
 
-      <!-- 3 Result Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- Ledger strip: 3 measures in one panel -->
+      <div class="panel rounded-xl overflow-hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-linea">
 
-        <!-- Card: Capital Inicial -->
-        <div class="result-card card-aesthetic rounded-2xl p-4 sm:p-5 text-center flex flex-col justify-between">
-          <p class="text-xs font-bold text-vintage-textSecondary uppercase tracking-widest mb-2">💼 Monto Inicial</p>
-          <p class="card-value font-black text-vintage-textPrimary" id="card-initial">-</p>
-          <p class="text-xs font-medium text-vintage-textSecondary mt-2 opacity-80">Tu dinero hoy</p>
+          <!-- Medida: Capital aportado -->
+          <div class="result-card p-4 sm:p-5 text-center flex flex-col justify-between">
+            <p class="eyebrow text-grabado-muted/80 mb-2">Capital aportado</p>
+            <p class="card-value font-bold text-grabado" id="card-initial">-</p>
+            <p class="text-xs font-medium text-grabado-muted mt-2">Lo que pusiste, sin rendimiento</p>
+          </div>
+
+          <!-- Medida: Bajo el colchón -->
+          <div class="result-card p-4 sm:p-5 text-center flex flex-col justify-between bg-sello/[0.06]">
+            <p class="eyebrow text-sello mb-2">Bajo el colchón</p>
+            <p class="card-value font-bold text-sello" id="card-inflation">-</p>
+            <p class="text-xs font-medium text-grabado-muted mt-2">Poder de compra real</p>
+          </div>
+
+          <!-- Medida: Invirtiendo -->
+          <div class="result-card p-4 sm:p-5 text-center flex flex-col justify-between bg-oro/[0.06]">
+            <p class="eyebrow text-oro mb-2">Invirtiendo seguro</p>
+            <p class="card-value font-bold text-oro" id="card-invest">-</p>
+            <p class="text-xs font-medium text-grabado-muted mt-2">Con interés compuesto</p>
+          </div>
+
         </div>
-
-        <!-- Card: Bajo el Colchón -->
-        <div class="result-card card-aesthetic rounded-2xl p-4 sm:p-5 text-center flex flex-col justify-between border-l-4 border-l-vintage-accentRed focus:outline-none">
-          <p class="text-xs font-bold text-vintage-accentRed uppercase tracking-widest mb-2">📉 Bajo el Colchón</p>
-          <p class="card-value font-black text-vintage-accentRed" id="card-inflation">-</p>
-          <p class="text-xs font-medium text-vintage-textSecondary mt-2 opacity-80">Poder adquisitivo real</p>
-        </div>
-
-        <!-- Card: Invirtiendo -->
-        <div class="result-card card-aesthetic rounded-2xl p-4 sm:p-5 text-center flex flex-col justify-between border-l-4 border-l-vintage-accentGreen">
-          <p class="text-xs font-bold text-vintage-accentGreen uppercase tracking-widest mb-2">📈 Invirtiendo Seguro</p>
-          <p class="card-value font-black text-vintage-accentGreen" id="card-invest">-</p>
-          <p class="text-xs font-medium text-vintage-textSecondary mt-2 opacity-80">Con interés compuesto</p>
-        </div>
-
       </div>
 
-      <!-- Gain/Loss summary banner -->
-      <div id="summary-banner" class="card-aesthetic rounded-2xl p-5 text-center bg-[rgba(255,255,255,0.4)]">
-        <p class="text-sm md:text-base text-vintage-textPrimary font-medium leading-relaxed">
-          Al invertir ganarías <strong id="gain-amount" class="text-vintage-accentGreen text-lg md:text-xl font-black mx-1"></strong> más que dejándolo quieto.<br class="hidden sm:block"/>
-          La inflación habría erosionado <strong id="loss-amount" class="text-vintage-accentRed text-lg md:text-xl font-black mx-1"></strong> de tu poder adquisitivo.
+      <!-- Gain/Loss summary + erosion meter -->
+      <div id="summary-banner" class="panel rounded-xl p-5 sm:p-6">
+        <p class="text-sm md:text-base text-grabado font-medium leading-relaxed text-center">
+          Invirtiendo terminarías con <strong id="gain-amount" class="text-oro font-mono font-bold text-lg md:text-xl mx-1"></strong> más que dejándolo quieto, y la inflación habría erosionado <strong id="loss-amount" class="text-sello font-mono font-bold text-lg md:text-xl mx-1"></strong> de tu poder adquisitivo.
         </p>
+        <div id="erosion-meter" class="mt-5 max-w-md mx-auto">
+          <div class="flex justify-between eyebrow text-grabado-muted mb-1.5">
+            <span>Poder de compra conservado</span>
+            <span id="erosion-pct" class="tabular-nums text-grabado">—</span>
+          </div>
+          <div class="h-2.5 w-full rounded-full bg-sello/20 overflow-hidden">
+            <div id="erosion-bar" class="h-full rounded-full bg-oro transition-all duration-700 ease-out" style="width:0%"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Chart -->
-      <div class="card-aesthetic rounded-2xl p-4 sm:p-6">
-        <h2 class="text-base font-bold text-vintage-textPrimary mb-4 flex items-center gap-2">
-          <span class="opacity-80">📊</span> Proyección en el Tiempo
+      <div class="panel rounded-xl p-4 sm:p-6">
+        <h2 class="text-base font-bold text-grabado mb-4 flex items-baseline gap-3">
+          <span class="eyebrow text-oro">02</span> Proyección en el tiempo
         </h2>
         <div class="relative w-full" style="height: 300px;">
           <canvas id="projection-chart"></canvas>
         </div>
         <!-- Legend -->
-        <div class="flex flex-wrap justify-center gap-5 mt-5 text-xs font-bold text-vintage-textSecondary">
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full inline-block bg-vintage-accentBlue shadow-sm"></span> Capital Inicial</span>
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full inline-block bg-vintage-accentRed shadow-sm"></span> Bajo el Colchón</span>
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full inline-block bg-vintage-accentGreen shadow-sm"></span> Invirtiendo</span>
+        <div class="flex flex-wrap justify-center gap-5 mt-5 eyebrow text-grabado-muted">
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full inline-block bg-grabado/70"></span> Capital aportado</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full inline-block bg-sello"></span> Bajo el colchón</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full inline-block bg-oro"></span> Invirtiendo</span>
         </div>
       </div>
 
       <!-- Disclaimer -->
-      <p class="text-xs font-medium text-vintage-textSecondary text-center pb-2 opacity-75 max-w-xl mx-auto">
-        ⚠️ Las tasas son promedios estimados 2022-2024. No constituyen asesoría financiera. Las rentabilidades pasadas no garantizan rentabilidades futuras.
+      <p class="text-xs font-medium text-grabado-muted text-center pb-2 opacity-80 max-w-xl mx-auto">
+        Las tasas son promedios estimados 2022–2024 y no constituyen asesoría financiera. Las rentabilidades pasadas no garantizan rentabilidades futuras.
       </p>
 
       <!-- Premium Features Unlock / Lead Capture -->
-      <div id="premium-unlock-section" class="card-aesthetic rounded-2xl p-6 sm:p-8 mt-2 border-2 border-vintage-accentBlue/20">
-        <h2 class="text-xl font-extrabold text-vintage-textPrimary mb-3 flex items-center gap-2">
-          <span>✨</span> Desbloquea Funciones Avanzadas
+      <div id="premium-unlock-section" class="panel rounded-xl p-6 sm:p-8 mt-2 border-oro/40">
+        <h2 class="text-xl font-bold text-grabado mb-3">
+          Desbloquea funciones avanzadas
         </h2>
-        <p class="text-sm font-medium text-vintage-textSecondary mb-5">
-          ¿Quieres simular con <strong>tasas de rendimiento personalizadas</strong> y recibir estrategias exclusivas para ganarle a la inflación? Ingresa tus datos para desbloquear estas funciones.
+        <p class="text-sm font-medium text-grabado-muted mb-5">
+          Simula con <strong class="text-grabado">tasas de rendimiento personalizadas</strong> y recibe estrategias para ganarle a la inflación. Deja tus datos para activarlas.
         </p>
-        
+
         <form id="lead-form" class="flex flex-col gap-4">
           <div class="flex flex-col sm:flex-row gap-3">
             <input
               id="name"
               type="text"
               required
-              placeholder="Tu Nombre"
-              class="input-styled flex-1 rounded-xl px-4 py-3 text-base font-bold shadow-inner"
+              placeholder="Tu nombre"
+              class="input-styled flex-1 rounded-lg px-4 py-3 text-base font-semibold"
             />
             <input
               id="email"
               type="email"
               required
-              placeholder="Tu Correo Electrónico"
-              class="input-styled flex-1 rounded-xl px-4 py-3 text-base font-bold shadow-inner"
+              placeholder="Tu correo electrónico"
+              class="input-styled flex-1 rounded-lg px-4 py-3 text-base font-semibold"
             />
           </div>
-          
+
           <button
             id="btn-save-lead"
             type="submit"
-            class="w-full sm:w-auto self-end bg-vintage-accentBlue hover:opacity-90 active:scale-95 text-[#F4EFE6] font-black tracking-wide text-base py-3 px-8 rounded-xl transition-all duration-200 shadow-md flex items-center justify-center gap-2"
+            class="w-full sm:w-auto self-end bg-oro hover:bg-[#D9B45C] active:scale-[0.98] text-billete-deep font-bold tracking-wide text-base py-3 px-8 rounded-lg transition-all duration-200 shadow-[0_4px_16px_rgba(203,163,73,0.3)] flex items-center justify-center gap-2"
           >
-            🔓 Desbloquear Ahora
+            Desbloquear ahora
           </button>
           <div id="lead-message" class="text-sm text-center h-5 font-medium transition-colors w-full mt-1"></div>
         </form>
@@ -329,6 +376,6 @@
 
   </main>
 
-  <script src="/static/script.js?v=5"></script>
+  <script src="/static/script.js?v=7"></script>
 </body>
 </html>

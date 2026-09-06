@@ -92,6 +92,10 @@ function updateRatesInfo() {
     `(${country.currency})`;
   document.getElementById('currency-symbol').textContent =
     country.currency_symbol;
+  document.getElementById('monthly-currency-label').textContent =
+    `(${country.currency})`;
+  document.getElementById('monthly-currency-symbol').textContent =
+    country.currency_symbol;
 
   document.getElementById('rates-info').classList.remove('hidden');
 }
@@ -165,7 +169,7 @@ async function captureLeadData() {
     const email = formElements.email.value;
     
     if (!name || !email) {
-        showLeadMessage('Por favor, completa ambos campos para activar la simulación.', 'text-vintage-accentRed');
+        showLeadMessage('Completa ambos campos para activar la simulación.', 'text-sello');
         return false;
     }
 
@@ -183,12 +187,12 @@ async function captureLeadData() {
             throw new Error('Error en el servidor al guardar datos.');
         }
 
-        showLeadMessage('✅ Datos guardados. ¡Calculando tu impacto financiero!', 'text-vintage-accentGreen');
+        showLeadMessage('Datos guardados. Calculando tu impacto financiero.', 'text-oro');
         return true;
 
     } catch (error) {
         console.error("Lead capture error:", error);
-        showLeadMessage(`❌ Fallo al guardar datos: ${error.message}. Intenta más tarde.`, 'text-vintage-accentRed');
+        showLeadMessage(`Fallo al guardar datos: ${error.message}. Intenta más tarde.`, 'text-sello');
         return false;
     } finally {
         showLoadingState(false);
@@ -205,10 +209,10 @@ function showLoadingState(isLoading) {
     if (btn) {
         btn.disabled = isLoading;
         if (isLoading) {
-             btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-[#F4EFE6]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Procesando...`;
-             btn.classList.add('opacity-80', 'cursor-not-allowed');
+              btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-billete-deep" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Procesando...`;
+              btn.classList.add('opacity-80', 'cursor-not-allowed');
         } else {
-             btn.innerHTML = `🔓 Desbloquear Ahora`;
+             btn.innerHTML = `Desbloquear ahora`;
              btn.classList.remove('opacity-80', 'cursor-not-allowed');
         }
     }
@@ -217,10 +221,11 @@ function showLoadingState(isLoading) {
 // ── Main calculation logic ──────────────────────────────────────────────
 function calculate() {
   const capital = parseFloat(document.getElementById('capital').value);
+  const monthly = parseFloat(document.getElementById('monthly-contribution').value) || 0;
   const selectedId = document.getElementById('country').value;
   const years = parseInt(document.getElementById('years').value, 10);
   const customRateStr = document.getElementById('custom-rate').value;
- 
+
   if (!capital || capital <= 0) {
     alert('Por favor ingresa un capital válido mayor a 0.');
     return;
@@ -229,45 +234,71 @@ function calculate() {
     alert('Por favor selecciona un país.');
     return;
   }
- 
+
   const country = countriesData.find(c => c.id === selectedId);
- 
+
   const customRate = parseFloat(customRateStr);
   const effectiveSafeRate = (!isNaN(customRate) && customRate >= 0) ? (customRate / 100) : country.safe_rate;
- 
+
   const labels = [];
-  const seriesBase = [];      
-  const seriesInflation = []; 
-  const seriesInvested = [];  
- 
-  for (let t = 0; t <= years; t++) {
-    labels.push(t === 0 ? 'Hoy' : `Año ${t}`);
-    seriesBase.push(capital);
-    seriesInflation.push(capital / Math.pow(1 + country.inflation_rate, t));
-    seriesInvested.push(capital * Math.pow(1 + effectiveSafeRate, t));
+  const seriesBase = [];
+  const seriesInflation = [];
+  const seriesInvested = [];
+
+  let balanceInvested = capital;
+  // Convertimos tasa anual a tasa mensual equivalente
+  const monthlyRate = Math.pow(1 + effectiveSafeRate, 1/12) - 1;
+
+  labels.push('Hoy');
+  seriesBase.push(capital);
+  seriesInflation.push(capital);
+  seriesInvested.push(capital);
+
+  for (let t = 1; t <= years; t++) {
+    labels.push(`Año ${t}`);
+    
+    // Inversión: capitalización mensual con aportes
+    for (let m = 0; m < 12; m++) {
+      balanceInvested = balanceInvested * (1 + monthlyRate) + monthly;
+    }
+    seriesInvested.push(balanceInvested);
+    
+    // Dinero base (colchón nominal acumulado)
+    const currentBase = capital + monthly * 12 * t;
+    seriesBase.push(currentBase);
+    
+    // Inflación: poder adquisitivo del dinero base en términos de valor presente
+    const currentInflation = currentBase / Math.pow(1 + country.inflation_rate, t);
+    seriesInflation.push(currentInflation);
   }
- 
+
+  const finalBase      = seriesBase[years];
   const finalInflation = seriesInflation[years];
   const finalInvested  = seriesInvested[years];
- 
+
   const resultsSection = document.getElementById('results-section');
   resultsSection.classList.remove('hidden');
- 
+
   setTimeout(() => {
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
- 
-  animateCount('card-initial',  capital,         country.currency);
+
+  animateCount('card-initial',   finalBase,       country.currency);
   animateCount('card-inflation', finalInflation,  country.currency);
   animateCount('card-invest',    finalInvested,   country.currency);
- 
-  const gainVsColchon = finalInvested - finalInflation;
-  const lossFromInflation = capital - finalInflation;
+
+  const gainVsColchon = finalInvested - finalBase;
+  const lossFromInflation = finalBase - finalInflation;
   document.getElementById('gain-amount').textContent =
     formatCardValue(gainVsColchon, country.currency);
   document.getElementById('loss-amount').textContent =
     formatCardValue(lossFromInflation, country.currency);
- 
+
+  // Línea de erosión: % de poder de compra conservado frente al colchón
+  const keptPct = finalBase > 0 ? (finalInflation / finalBase) * 100 : 0;
+  document.getElementById('erosion-bar').style.width = `${Math.max(0, Math.min(100, keptPct))}%`;
+  document.getElementById('erosion-pct').textContent = `${keptPct.toFixed(0)}%`;
+
   const ctx = document.getElementById('projection-chart').getContext('2d');
   const pRadius = years > 30 ? 1 : (years > 15 ? 2.5 : 4);
  
@@ -277,10 +308,10 @@ function calculate() {
       {
         label: 'Capital Inicial',
         data: seriesBase,
-        borderColor: '#4A6984',
-        backgroundColor: 'rgba(74, 105, 132, 0.08)',
-        pointBackgroundColor: '#4A6984',
-        borderWidth: 2.5,
+        borderColor: '#EFE9D8',
+        backgroundColor: 'rgba(239, 233, 216, 0.06)',
+        pointBackgroundColor: '#EFE9D8',
+        borderWidth: 2,
         pointRadius: pRadius,
         pointHoverRadius: 7,
         fill: false,
@@ -290,9 +321,9 @@ function calculate() {
       {
         label: 'Bajo el Colchón (inflación)',
         data: seriesInflation,
-        borderColor: '#914541',
-        backgroundColor: 'rgba(145, 69, 65, 0.08)',
-        pointBackgroundColor: '#914541',
+        borderColor: '#D26A5C',
+        backgroundColor: 'rgba(210, 106, 92, 0.12)',
+        pointBackgroundColor: '#D26A5C',
         borderWidth: 2.5,
         pointRadius: pRadius,
         pointHoverRadius: 7,
@@ -302,9 +333,9 @@ function calculate() {
       {
         label: 'Invirtiendo Seguro',
         data: seriesInvested,
-        borderColor: '#41704B',
-        backgroundColor: 'rgba(65, 112, 75, 0.10)',
-        pointBackgroundColor: '#41704B',
+        borderColor: '#CBA349',
+        backgroundColor: 'rgba(203, 163, 73, 0.14)',
+        pointBackgroundColor: '#CBA349',
         borderWidth: 2.5,
         pointRadius: pRadius,
         pointHoverRadius: 7,
@@ -321,11 +352,13 @@ function calculate() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(244, 239, 230, 0.95)',
-        borderColor: 'rgba(204, 192, 176, 0.8)',
+        backgroundColor: 'rgba(10, 39, 30, 0.95)',
+        borderColor: 'rgba(203, 163, 73, 0.4)',
         borderWidth: 1,
-        titleColor: '#2B231D',
-        bodyColor: '#5C544C',
+        titleColor: '#EFE9D8',
+        titleFont: { family: "'Fraunces', serif", weight: 'bold' },
+        bodyColor: '#9DB8AC',
+        bodyFont: { family: "'Spline Sans Mono', monospace" },
         padding: 12,
         callbacks: {
           label: function (context) {
@@ -337,13 +370,13 @@ function calculate() {
     },
     scales: {
       x: {
-        ticks: { color: '#5C544C', font: { size: 11, weight: 'bold' } },
-        grid: { color: 'rgba(92, 84, 76, 0.15)' },
+        ticks: { color: '#9DB8AC', font: { size: 11, family: "'Spline Sans Mono', monospace", weight: 'bold' } },
+        grid: { color: 'rgba(239, 233, 216, 0.08)' },
       },
       y: {
         ticks: {
-          color: '#5C544C',
-          font: { size: 11, weight: 'bold' },
+          color: '#9DB8AC',
+          font: { size: 11, family: "'Spline Sans Mono', monospace", weight: 'bold' },
           callback: function (value) {
             const sym = country.currency_symbol;
             const abs = Math.abs(value);
@@ -353,7 +386,7 @@ function calculate() {
             return `${sym}${value}`;
           }
         },
-        grid: { color: 'rgba(92, 84, 76, 0.15)' },
+        grid: { color: 'rgba(239, 233, 216, 0.08)' },
       }
     }
   };
@@ -392,7 +425,7 @@ function unlockPremiumFeatures(isInitialLoad = false) {
     
     const label = document.getElementById('custom-rate-label');
     if (label) {
-        label.innerHTML = '🎯 Tasa de Rendimiento Anual (Personalizada)';
+        label.textContent = 'Tasa de rendimiento anual — Personalizada';
     }
     
     const desc = document.getElementById('custom-rate-desc');
@@ -409,9 +442,9 @@ function unlockPremiumFeatures(isInitialLoad = false) {
     if (premiumSection) {
         premiumSection.innerHTML = `
             <div class="text-center py-6 animate-fade-in">
-                <span class="text-4xl mb-3 block">🎉</span>
-                <h3 class="text-xl font-extrabold text-vintage-accentGreen mb-2">¡Funciones Desbloqueadas!</h3>
-                <p class="text-base font-medium text-vintage-textSecondary">Ya puedes usar la tasa personalizada en la sección de datos.</p>
+                <span class="font-display text-4xl mb-3 block text-oro" aria-hidden="true">&#10022;</span>
+                <h3 class="text-xl font-bold text-oro mb-2">Funciones desbloqueadas</h3>
+                <p class="text-base font-medium text-grabado-muted">Ya puedes usar la tasa personalizada en la sección de datos.</p>
             </div>
         `;
     }
