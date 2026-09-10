@@ -27,7 +27,7 @@
 ## 🎯 ¿Por qué nació este proyecto?
 Mucha gente ahorra dejando su dinero en una cuenta base o literal "bajo el colchón", pensando que están a salvo de riesgos. Sin embargo, ignoran un riesgo invisible pero constante: la **inflación**.
 
-Esta Single Page Application (SPA), patrocinada sutilmente por la marca "Mente Rica", busca concientizar a los usuarios mediante comparaciones de **datos macroeconómicos reales (2022-2024)** para Ecuador (USD) y México (MXN), contrastando escenarios de dejar tu dinero quieto vs. una inversión de renta fija segura.
+Esta Single Page Application (SPA), patrocinada sutilmente por la marca "Proti Finanzas", busca concientizar a los usuarios mediante comparaciones de **datos macroeconómicos reales (2022-2024)** para Ecuador (USD) y México (MXN), contrastando escenarios de dejar tu dinero quieto vs. una inversión de renta fija segura.
 
 ## ✨ Características Principales
 
